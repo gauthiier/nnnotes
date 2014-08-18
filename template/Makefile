@@ -1,0 +1,34 @@
+#output dir
+OUT := ./
+
+#csl - http://editor.citationstyles.org/
+CSL :=
+
+#bibliography file
+BIB :=
+
+#pdf
+PDF := $(patsubst %.mmd,$(OUT)%.pdf,$(wildcard *.mmd))
+
+$(OUT)%.pdf : %.mmd
+	pandoc $< -o $@
+
+#html
+HTML := $(patsubst %.mmd,$(OUT)%.html,$(wildcard *.mmd))
+
+$(OUT)%.html : %.mmd
+	pandoc $< -s --filter pandoc-citeproc --csl $(CSL) --bibliography $(BIB) -o $@
+
+all : dir $(HTML)
+
+index :
+	parse.py < $(wildcard *.mmd)
+                        
+clean :
+	rm -f $(HTML)
+	rm -f $(PDF)
+
+rebuild : clean all
+
+dir : 
+	mkdir -p $(OUT)
