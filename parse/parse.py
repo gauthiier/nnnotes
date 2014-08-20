@@ -7,11 +7,12 @@ markups = {'QUOTES' : ('PAGE', 'pp', 'tags', 'quote', 'fpc'), 'NOTES' : ('NOTE',
 output = {'QUOTES' : [], 'NOTES' : []}
 
 
-def error(cargo):
+def error(c):
+	fp, l = c
 	# Don't want to get here! Unidentifiable line
-	sys.stderr.write('Unidentifiable line:\n'+ line)
+	sys.stderr.write('Unidentifiable line:\n'+ l)
 
-def eof(cargo):
+def eof(c):
 	# Normal termination -- Cleanup code might go here.
 	sys.stdout.write('Processing Successful\n')	
 	fpindx = open('.indx','wb')

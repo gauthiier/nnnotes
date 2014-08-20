@@ -7,9 +7,8 @@ if [[ -e "$WHERE/CONFIG" ]]; then
 	source $WHERE/CONFIG
 fi
 
+OUT=txt # defaults to txt output
 OPTIND=1 #reset getopts
-
-OUT=txt # default output
 
 while getopts :b:r:o: opts; do
 	case $opts in
