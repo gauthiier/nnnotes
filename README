@@ -34,6 +34,49 @@ I???+~:,,,...    .=:=~I$$+,         .$7?+++++=+==+~,,:==+?78DDDDDDDO88OZOO88O888
 ,.....,~~==:=?$ZOZ7 .,~7IZZOZZZZOOOZO$I$Z$$Z$Z$ZZ7$I+==~DDDN8DDO$O88D8DDZO8OZ888
 =+=:~::=~~:+$ZZZ$+...I77$OZ$$IIZ$?$Z7=======~=++??==,::=D8D88D8D8ZOODOOOZZ8ZOaOO
 
+todo:
 * install script
-* man page
+* man pages
 * deps
+
+----
+
+NAME
+	nnnew
+
+SYNOPSIS
+	nnnew [-t] title [OPTIONS]
+
+DESCRIPTION
+	nnnew - generates new nnnote directory with (1) markdown source file of the nnnote, 
+	(2) makefile to build nnnote using pandoc, (3) optional copy of the reference 
+	publication of the nnnote
+
+OPTIONS
+	-t title 
+		name of the nnnote - used as name for the created directory
+
+	-f file
+		URI of the file to be copied as reference for the nnnew nnnote. 
+		
+	-b file
+		file path of the exported (zotero) bibliographic data (csl-json format)
+
+	-r ref
+		identifier of the reference in the (zotero) bibliographic data
+
+FILES
+	./CONFIG
+		Contains variables referencing (1) file path of the exported (zotero) 
+		bibliographic data
+
+
+AUTHOR
+	gauthiier <gauthiier.info>
+
+SEE ALSO
+	bibliographe, parse.py, pandoc
+
+----
+
+
