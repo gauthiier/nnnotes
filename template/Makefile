@@ -19,7 +19,7 @@ HTML := $(patsubst %.mmd,$(OUT)%.html,$(wildcard *.mmd))
 $(OUT)%.html : %.mmd
 	pandoc $< -s --filter pandoc-citeproc --csl $(CSL) --bibliography $(BIB) -o $@
 
-all : dir $(HTML)
+all : dir $(HTML) index
 
 index :
 	parse.py < $(wildcard *.mmd)
