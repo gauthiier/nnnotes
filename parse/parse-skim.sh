@@ -15,4 +15,4 @@ skimnotes get -format txt $f
 
 parse-skim.py < "$filename.txt"
 
-#rm $filename.txt
+rm $filename.txt

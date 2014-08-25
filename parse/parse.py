@@ -3,7 +3,19 @@
 from statemachine import StateMachine
 import sys, string, re, json
 
-markups = {'QUOTES' : ('PAGE', 'pp', 'tags', 'quote', 'fpc'), 'NOTES' : ('NOTE', '#', 'tags', 'note', 'fpc')}
+def is_quote_identifier(line):
+	l = line.strip().upper()
+	return l.startswith("<!--") and l.find("PAGE") >= 0
+
+def is_note_identifier(line):
+	l = line.strip().upper()
+	return l.startswith("<!--") and l.find("NOTE") >= 0	
+
+def is_tag_identifier(line):
+	l = line.strip()
+	return l.startswith('<') and not l.startswith('<!')
+
+markups = {'QUOTES' : (is_quote_identifier, 'pp', 'tags', 'quote', 'fpc'), 'NOTES' : (is_note_identifier, '#', 'tags', 'note', 'fpc')}
 output = {'QUOTES' : [], 'NOTES' : []}
 
 
@@ -20,7 +32,7 @@ def parse(c):
 	while 1:
 		line = fp.readline()
 		if not line: return eof, (fp, line)
-		if line[:2] == '##': return section(line), (fp, line)
+		if line.strip().startswith('##'): return section(line), (fp, line)
 		else: continue
 
 def QUOTES(c):
@@ -28,8 +40,8 @@ def QUOTES(c):
 	while 1:
 		line = fp.readline()
 		if not line: return eof, (fp, line)
-		elif line.strip().upper().startswith('PAGE'): return segment, (fp, line, 'QUOTES', markups['QUOTES'])
-		elif line.strip().startswith(u'##'): return section(line), (fp, line)
+		elif is_quote_identifier(line): return segment, (fp, line, 'QUOTES', markups['QUOTES'])
+		elif line.strip().startswith('##'): return section(line), (fp, line)
 		else: continue
 
 def NOTES(c):	
@@ -37,8 +49,8 @@ def NOTES(c):
 	while 1:
 		line = fp.readline()
 		if not line: return eof, (fp, line)
-		elif line.strip().upper().startswith('NOTE'): return segment, (fp, line, 'NOTES', markups['NOTES'])
-		elif line[:2] == '##': return section(line), (fp, line)
+		elif is_note_identifier(line): return segment, (fp, line, 'NOTES', markups['NOTES'])
+		elif line.strip().startswith('##'): return section(line), (fp, line)
 		else: continue
 
 def segment(c):
@@ -49,25 +61,28 @@ def segment(c):
 	q = ''
 	cc = ''
 	# identifier
-	c = ext_identifier(l)
+	c = extract_identifier(l)
 	while 1:
 		cursor = fp.tell()
 		line = fp.readline()
+
+
 		if not line: 
 			# transition: EOF - record entry
-			rec_segment(c, t, q, cc, (sect, x, tt, y, cnt))
+			record_segment(c, t, q, cc, (sect, x, tt, y, cnt))
 			return eof, (fp, line)
-		elif line.strip().upper().startswith(m):
+
+		elif m(line):
 			# transition: new segment - record entry
-			rec_segment(c, t, q, cc, (sect, x, tt, y, cnt))
+			record_segment(c, t, q, cc, (sect, x, tt, y, cnt))
 			return segment, (fp, line, sect, mk)
-		elif line[:1] == '<': 
+		elif is_tag_identifier(line): 
 			# tags
-			t += ext_tags(line)
+			t += extract_tags(line)
 			continue
 		elif line[:2] == '##': 
 			# transition: new section - record entry
-			rec_segment(c, t, q, cc, (sect, x, tt, y, cnt))
+			record_segment(c, t, q, cc, (sect, x, tt, y, cnt))
 			return section(line), (fp, line)
 		elif line == '\n' :
 			continue
@@ -81,32 +96,39 @@ def segment(c):
 ## helper fncts
 def section(line):
 	line = string.upper(line)
-	if string.find(line, 'NOTES') >= 0: return NOTES
-	elif string.find(line, 'QUOTES') >= 0: return QUOTES
-	elif string.find(line, 'REFERENCE') >= 0: return parse
+	if line.find('NOTES') >= 0: return NOTES
+	elif line.find('QUOTES') >= 0: return QUOTES
+	elif line.find('REFERENCE') >= 0: return parse
 	else: return parse
 
 # todo - optimise this (i.e: id != only the last word)
-def ext_identifier(line):
-	b = string.rsplit(line)
-	return b[-1]
+def extract_identifier(line):
+	t = line.strip().replace('<!--', '').replace('-->', '')
+	return t.strip().rsplit()[-1]
 
-def ext_tags(line):
+def extract_tags(line):
 	line = line.rstrip('\n').replace(' ','')
 	t = re.split('<|>', line)
 	return [v for v in t if v]
 
-def rec_segment(idf, tags, text, cnt, mk):
+def record_segment(idf, tags, text, cnt, mk):
 	if not text:
 		#sys.stderr.write('hmm... no quote on pp.' + idf)
 		return None
-	if text[0] == '>':
-		text = text[1:]
-	text = text.strip()
+	text = escape_quote(text)
+	text = escape_note(text)
 	section_i, idf_i, tags_i, text_i, cnt_i = mk
 	entry = {idf_i : idf, text_i : text, tags_i : tags, cnt_i : cnt}
 	output[section_i].append(entry)
 
+def escape_quote(line):
+	if(not line.strip().startswith('>')):
+		return line
+	l = re.sub('\"*\"', '', line.strip()[1:])
+	return re.sub('pp.[0-9]+', '', l)
+
+def escape_note(line):
+	return re.sub('^[0-9]+.', '', line).strip()
 
 if __name__ == '__main__':
 	m = StateMachine();
