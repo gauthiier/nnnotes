@@ -4,14 +4,19 @@ for i in *.pdf; do
     f=$i
 done
 
-if [[ -z '$f' ]]; then
-	echo "No pdf file in directory... Aborting.";
+if [[ -d '$f' ]]; then
+	echo "$f No pdf file in directory... Aborting.";
 	exit;
 fi
 
 filename="${f%.*}"
 
 skimnotes get -format txt $f
+
+if [[ ! -f '$filename.txt' ]]; then
+	echo "No skim notes in pdf $f. Aborting.";
+	exit;
+fi
 
 parse-skim.py < "$filename.txt"
 

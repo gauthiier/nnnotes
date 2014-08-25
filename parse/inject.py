@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from statemachine import StateMachine
-import sys, os, string, json, shutil, codecs
+import sys, os, string, json, shutil, codecs, traceback
 
 quote_nbr = sys.maxint
 fileout = ''
@@ -170,17 +170,35 @@ if __name__ == '__main__':
 	if len(sys.argv) < 2:
 		sys.exit('No input file... Aborting.')
 	# fp1 should be the incoming .mmd file
-	fileref = backupfile(sys.argv[1])
-	fileout = open_fileoutput(sys.argv[1])
-	fileout.seek(0)
+	try:
+		fileref = backupfile(sys.argv[1])
+		fileout = open_fileoutput(sys.argv[1])
+		fileout.seek(0)
+	except:
+		sys.exit("Can't open file " + sys.argv[1] + ". Aborting.")
+
 	if len(sys.argv) < 3:
 		fp2 = sys.stdin
 	else:
-		fp2 = open_file(sys.argv[2])
+		try:
+			fp2 = open_file(sys.argv[2])
+		except:
+			sys.exit("Can't open file " + sys.argv[2] + ". Aborting.")
 
 	# fp2 should be the incoming (json) data to inject in fp1
-	data = json.load(fp2)
-	fp2.close()
+
+	try:
+		sdata = fp2.read()
+		data = json.loads(sdata)
+	except:
+		e = "<inject> Error loading data. Aborting\n"
+		if sdata:
+			e += "Traceback: " + sdata
+		fileout.close()
+		fileref.close()
+		sys.exit(e)
+	finally:
+		fp2.close()
 
 	if not data['QUOTES'] and not data['NOTES']:
 		print "Document up-to-date."
@@ -192,18 +210,27 @@ if __name__ == '__main__':
 
 	notes_cnt = 0
 
-	m = StateMachine();
-	m.add_state(parse)
-	m.add_state(NOTES)
-	m.add_state(QUOTES)
-	m.add_state(process_quote)
-	m.add_state(process_note)
-	m.add_state(error, end_state=1)
-	m.add_state(eof, end_state=1)
-	m.set_start(parse)
-	m.run((fileref, ''))
+	try:
+		m = StateMachine();
+		m.add_state(parse)
+		m.add_state(NOTES)
+		m.add_state(QUOTES)
+		m.add_state(process_quote)
+		m.add_state(process_note)
+		m.add_state(error, end_state=1)
+		m.add_state(eof, end_state=1)
+		m.set_start(parse)
+		m.run((fileref, ''))
+	except:
+		trace = "Error injecting.\n\nTrace: \n"
+		trace += traceback.format_exc()
+	else:
+		trace = "Done injection."
+	finally:
+		fileout.close()
+		fileref.close()
+		sys.exit(trace)
 
-	fileout.close()
-	fileref.close()
+
 
 

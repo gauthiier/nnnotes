@@ -49,23 +49,41 @@ def open_file(p):
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
 		sys.exit('No input file... Aborting.')
-	fp1 = open_file(sys.argv[1])
+	try:
+		fp1 = open_file(sys.argv[1])
+	except:
+		sys.exit("Can't open file " + sys.argv[1] + ". Aborting.")
 	if len(sys.argv) < 3:
 		fp2 = sys.stdin
 	else:
-		fp2 = open_file(sys.argv[2])
+		try:
+			fp2 = open_file(sys.argv[2])
+		except:
+			sys.exit("Can't open file " + sys.argv[2] + ". Aborting.")
 
-	data1 = json.load(fp1)
-	data2 = json.load(fp2)
-
-	# print "----"
-	# print data1
-	# print "----"
-	# print data2
-	# print "----"
-
-	fp1.close()
-	fp2.close()
+	try:
+		sdata = fp1.read()
+		data1 = json.loads(sdata)
+	except:
+		e = "<compare> Error loading data from" + sys.argv[1] + ". Aborting.\n"
+		if sdata:
+			e += "Traceback: " + sdata1
+		fp2.close()
+		sys.exit(e)		
+	finally:
+		fp1.close()
+		
+	try:
+		sdata = fp2.read()
+		data2 = json.loads(sdata)
+	except:
+		e = "<compare> Error loading data. Aborting.\n"
+		if sdata:
+			e += "Traceback: " + sdata
+		fp1.close()
+		sys.exit(e)
+	finally:
+		fp2.close()
 
 	data = difference(data1, data2)
 
