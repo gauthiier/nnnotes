@@ -24,7 +24,7 @@ def highlight(c):
 	fp, l = c
 	p = page(l)
 	text = fp.readline()
-	output['QUOTES'].append({'pp' : p, 'quote' : text})
+	output['QUOTES'].append({'pp' : p, 'quote' : text.strip()})
 	return parse(c)
 
 def anchored_note(c):
@@ -33,22 +33,22 @@ def anchored_note(c):
 	text = fp.readline()
 	fp.readline()
 	note = fp.readline()	
-	output['QUOTES'].append({'pp' : p, 'quote' : text})
-	output['NOTES'].append({'pp' : p, 'note' : note})
+	output['QUOTES'].append({'pp' : p, 'quote' : text.strip()})
+	output['NOTES'].append({'pp' : p, 'note' : note.strip()})
 	return parse(c)
 
 def box(c):
 	fp, l = c
 	p = page(l)
 	text = fp.readline()	
-	output['QUOTES'].append({'pp' : p, 'quote' : text})
+	output['QUOTES'].append({'pp' : p, 'quote' : text.strip()})
 	return parse(c)
 
 def text_note(c):
 	fp, l = c
 	p = page(l)
 	text = fp.readline()
-	output['NOTES'].append({'pp' : p, 'note' : text})
+	output['NOTES'].append({'pp' : p, 'note' : text.strip()})
 	return parse(c)
 
 ## helper fncts

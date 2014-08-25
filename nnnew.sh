@@ -63,6 +63,8 @@ cp -aR $WHERE/template/* $TITLE
 
 cd $TITLE
 
+touch notes.mmd
+
 # file exists? copy to output
 [ -z "$FILE" ] && echo "No file to copy. Make sure to reference in text in the note!" || curl -O $FILE 
 

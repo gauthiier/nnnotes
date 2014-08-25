@@ -25,20 +25,20 @@ def parse(c):
 
 def QUOTES(c):
 	fp, l = c
-	sys.stdout.write('QUOTES\n')		
 	while 1:
 		line = fp.readline()
 		if not line: return eof, (fp, line)
-		elif string.find(string.upper(line), 'PAGE') >= 0: return segment, (fp, line, 'QUOTES', markups['QUOTES'])
+		elif line.strip().upper().startswith('PAGE'): return segment, (fp, line, 'QUOTES', markups['QUOTES'])
+		elif line.strip().startswith(u'##'): return section(line), (fp, line)
 		else: continue
 
-def NOTES(c):
+def NOTES(c):	
 	fp, l = c
-	sys.stdout.write('NOTES\n')		
 	while 1:
 		line = fp.readline()
 		if not line: return eof, (fp, line)
-		elif string.find(string.upper(line), 'NOTE') >= 0: return segment, (fp, line, 'NOTES', markups['NOTES'])
+		elif line.strip().upper().startswith('NOTE'): return segment, (fp, line, 'NOTES', markups['NOTES'])
+		elif line[:2] == '##': return section(line), (fp, line)
 		else: continue
 
 def segment(c):
@@ -57,7 +57,7 @@ def segment(c):
 			# transition: EOF - record entry
 			rec_segment(c, t, q, cc, (sect, x, tt, y, cnt))
 			return eof, (fp, line)
-		elif string.find(string.upper(line), m) >= 0: 
+		elif line.strip().upper().startswith(m):
 			# transition: new segment - record entry
 			rec_segment(c, t, q, cc, (sect, x, tt, y, cnt))
 			return segment, (fp, line, sect, mk)
@@ -84,8 +84,9 @@ def section(line):
 	if string.find(line, 'NOTES') >= 0: return NOTES
 	elif string.find(line, 'QUOTES') >= 0: return QUOTES
 	elif string.find(line, 'REFERENCE') >= 0: return parse
-	else: return error
+	else: return parse
 
+# todo - optimise this (i.e: id != only the last word)
 def ext_identifier(line):
 	b = string.rsplit(line)
 	return b[-1]
@@ -97,8 +98,11 @@ def ext_tags(line):
 
 def rec_segment(idf, tags, text, cnt, mk):
 	if not text:
-		print 'hmm... no quote on pp.', c
+		#sys.stderr.write('hmm... no quote on pp.' + idf)
 		return None
+	if text[0] == '>':
+		text = text[1:]
+	text = text.strip()
 	section_i, idf_i, tags_i, text_i, cnt_i = mk
 	entry = {idf_i : idf, text_i : text, tags_i : tags, cnt_i : cnt}
 	output[section_i].append(entry)
