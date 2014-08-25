@@ -28,6 +28,9 @@ clean :
 	rm -f $(HTML)
 	rm -f $(PDF)
 
+neat:
+	rm *.bak
+
 rebuild : clean all
 
 dir : 
