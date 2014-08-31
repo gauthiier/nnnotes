@@ -9,15 +9,15 @@ if [[ -d '$f' ]]; then
 	exit;
 fi
 
-filename="${f%.*}"
+filename="${f%.*}".txt
 
 skimnotes get -format txt $f
 
-if [[ ! -f '$filename.txt' ]]; then
+if [[ ! -f $filename ]]; then
 	echo "No skim notes in pdf $f. Aborting.";
 	exit;
 fi
 
-parse-skim.py < "$filename.txt"
+parse-skim.py < $filename
 
-rm $filename.txt
+rm $filename
