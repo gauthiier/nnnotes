@@ -63,7 +63,7 @@ def process_quote(c):
 	fp, l = c
 	ppnbr = int(extract_identifier(l))
 	for i in quotes.keys():
-		if int(i) < ppnbr:
+		if i < ppnbr:
 			emit_quotes(quotes[i])
 	emit_line(l)
 	return QUOTES(c)
@@ -110,7 +110,9 @@ def emit_remaining_quotes():
 	rest = []
 	for i in quotes:
 		rest.extend(quotes[i])	
-	emit_quotes(rest)
+	for j in rest:
+		emit_quote(j)
+	#emit_quotes(rest)
 
 def emit_quotes(list):
 	while list:
@@ -141,11 +143,12 @@ def emit_line(l):
 def reoder(q):
 	out = {}
 	while q:
-		i = q.pop()
-		if i['pp'] in out.keys():
-			out[i['pp']].append(i)
+		ip = q.pop()
+		i = int(ip['pp'])
+		if i in out.keys():
+			out[i].append(ip)
 		else:
-			out[i['pp']] = [i]
+			out[i] = [ip]
 	return out
 
 def open_file(p):
@@ -207,6 +210,8 @@ if __name__ == '__main__':
 
 	quotes = reoder(data['QUOTES'])
 	notes = reoder(data['NOTES'])
+
+	print quotes
 
 	notes_cnt = 0
 

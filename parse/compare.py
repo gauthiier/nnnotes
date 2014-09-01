@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys, os, string, json
+from operator import attrgetter
 
 fp1 = ''
 fp2 = ''
@@ -86,6 +87,9 @@ if __name__ == '__main__':
 		fp2.close()
 
 	data = difference(data1, data2)
+
+	data['QUOTES'] = sorted(data['QUOTES'], key=lambda entry: int(entry['pp']))
+	data['NOTES'] = sorted(data['NOTES'], key=lambda entry: int(entry['pp']))
 
 	json.dump(data, sys.stdout)
 

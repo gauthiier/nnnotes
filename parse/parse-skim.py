@@ -61,7 +61,7 @@ def section(line):
 	else: return parse
 
 def page(line):	
-	return line.rstrip('\n').split(',')[1][-1]
+	return line.rstrip('\n').split(',')[-1].split(' ')[-1]
 
 if __name__ == '__main__':
 	m = StateMachine();
