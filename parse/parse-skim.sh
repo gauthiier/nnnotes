@@ -20,4 +20,4 @@ fi
 
 parse-skim.py < $filename
 
-#rm $filename
+rm $filename
