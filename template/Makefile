@@ -17,7 +17,7 @@ $(OUT)%.pdf : %.mmd
 HTML := $(patsubst %.mmd,$(OUT)%.html,$(wildcard *.mmd))
 
 $(OUT)%.html : %.mmd
-	pandoc $< -s --filter pandoc-citeproc --csl $(CSL) --bibliography $(BIB) -o $@
+	pandoc $< -s -t html5 --template=p/nnnote-template.html5 --filter pandoc-citeproc --csl $(CSL) --bibliography $(BIB) -o $@
 
 all : dir $(HTML) index
 

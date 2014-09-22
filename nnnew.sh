@@ -79,9 +79,11 @@ if [ -z "$BIBLIOGRAPHE_PATH" ]; then
 else
 	node $BIBLIOGRAPHE_PATH/refactorbib.js --data $BIB > tmpbib.json
 	REFERENCE=$(node $BIBLIOGRAPHE_PATH/generatebib.js --data tmpbib.json --items [\"$REF\"] --output md)
+	AUTHOR=$(whoami)
+	DATE=$(date +%Y\-%m\-%d)
 	echo $REFERENCE
 	rm tmpbib.json
-	sed -i.bak "s~*MACHINE-REF*~$REFERENCE~g" notes.mmd
+	sed -i.bak "s~*MACHINE-REF*~$REFERENCE~g ; s~%\ title~%\ $REFERENCE~g ; s~%\ author~%\ $AUTHOR~g ; s~%\ date~%\ $DATE~g" notes.mmd
 fi
 
 # cleanup
