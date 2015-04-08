@@ -18,7 +18,6 @@ def is_tag_identifier(line):
 markups = {'QUOTES' : (is_quote_identifier, 'pp', 'tags', 'quote', 'fpc'), 'NOTES' : (is_note_identifier, '#', 'tags', 'note', 'fpc')}
 output = {'QUOTES' : [], 'NOTES' : []}
 
-
 def error(c):
 	fp, l = c
 	sys.stderr.write('Unidentifiable line:\n'+ l)
@@ -65,7 +64,6 @@ def segment(c):
 	while 1:
 		cursor = fp.tell()
 		line = fp.readline()
-
 
 		if not line: 
 			# transition: EOF - record entry

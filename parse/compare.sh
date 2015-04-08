@@ -13,4 +13,6 @@ elif [[ $f -nt $INDXFILE ]]; then
 	make --quiet index
 fi	
 
-parse-skim.sh | compare.py .indx
+#parse-skim.sh | compare.py .indx
+
+parse-plfr.sh | compare.py .indx
