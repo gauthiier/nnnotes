@@ -1,11 +1,27 @@
 #!/bin/bash
 
+#Black        0;30     Dark Gray     1;30
+#Blue         0;34     Light Blue    1;34
+#Green        0;32     Light Green   1;32
+#Cyan         0;36     Light Cyan    1;36
+#Red          0;31     Light Red     1;31
+#Purple       0;35     Light Purple  1;35
+#Brown/Orange 0;33     Yellow        1;33
+#Light Gray   0;37     White         1;37
+
+BLUE='\033[0;34m'
+NC='\033[0m'
+
 WHERE=$( cd $(dirname $0) ; pwd -P )
 
 # default configs
 if [[ -e "$WHERE/CONFIG" ]]; then
 	source $WHERE/CONFIG
 fi
+
+print_usage() {
+	printf "usage: ${BLUE}nnnew.sh -t [title] -f [pdf file] -b [json biblio] -s [style] -r [reference]${NC}"
+}
 
 OPTIND=1 #reset getopts
 
@@ -27,11 +43,13 @@ while getopts t:f:b:s:r: opts; do
 			REF=$OPTARG
 			;;			
 		?)
-			echo "invalid option -$OPTARG";
+			#echo "invalid option -$OPTARG";
+			print_usage
 			exit;
 			;;
 		:)
 			echo "option -$OPTARG requires an argument";
+			print_usage
 			exit;
 			;;
 	esac
@@ -41,6 +59,7 @@ shift $((OPTIND-1))
 
 if [[ -z "$TITLE" ]]; then
 	echo "No title provided. Aborting."
+	print_usage
 	exit;
 fi
 
