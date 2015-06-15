@@ -193,7 +193,7 @@ if __name__ == '__main__':
 	try:
 		sdata = fp2.read()
 		data = json.loads(sdata)
-	except:
+	except Exception, ee:
 		e = "<inject> Error loading data. Aborting\n"
 		if sdata:
 			e += "Traceback: " + sdata
