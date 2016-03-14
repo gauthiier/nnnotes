@@ -27,16 +27,11 @@ done
 
 shift $((OPTIND-1))
 
-# bibliographe's path set?
-if [[ -z "$BIBLIOGRAPHE_PATH" ]]; then 
-	echo "No bibliographe"; 
-	exit;
-fi
-
 # bibliography exists?
 if [[ -z "$BIB" ]]; then
 	echo "No bibliography"
 	exit;
 fi 
 
-node $BIBLIOGRAPHE_PATH/refactorbib.js --data $BIB --index --print
+./parse/refactorbib.py -i $BIB 
+#node $BIBLIOGRAPHE_PATH/refactorbib.js --data $BIB --index --print

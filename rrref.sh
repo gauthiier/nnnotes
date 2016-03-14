@@ -52,7 +52,7 @@ if [[ -z "$REF" ]]; then
 	exit;
 fi 
 
-node $BIBLIOGRAPHE_PATH/refactorbib.js --data $BIB > tmpbib.json
+./parse/refactorbib.py $BIB > tmpbib.json
 REFERENCE=$(node $BIBLIOGRAPHE_PATH/generatebib.js --data tmpbib.json --items [\"$REF\"] --output $OUT)
 echo $REFERENCE
 rm tmpbib.json

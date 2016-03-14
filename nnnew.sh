@@ -96,7 +96,7 @@ touch notes.mmd
 if [ -z "$BIBLIOGRAPHE_PATH" ]; then
 	echo "No bibliographe"	
 else
-	node $BIBLIOGRAPHE_PATH/refactorbib.js --data $BIB > tmpbib.json
+	./parse/refactorbib.py $BIB > tmpbib.json
 	REFERENCE=$(node $BIBLIOGRAPHE_PATH/generatebib.js --data tmpbib.json --items [\"$REF\"] --output md)
 	AUTHOR=$(whoami)
 	DATE=$(date +%Y\-%m\-%d)
