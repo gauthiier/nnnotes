@@ -16,22 +16,25 @@ $(OUT)%.pdf : %.mmd
 #html
 HTML := $(patsubst %.mmd,$(OUT)%.html,$(wildcard *.mmd))
 
-$(OUT)%.html : %.mmd
+$(OUT)%.html: %.mmd
 	pandoc $< -s -t html5 --template=p/nnnote-template.html5 --filter pandoc-citeproc --csl $(CSL) --bibliography $(BIB) -o $@
 
-all : dir $(HTML) index
+all: dir $(HTML) index
 
-index :
-	parse.py < $(wildcard *.mmd)
+index:
+	iiindex
+
+inject:
+	iiinject
                         
-clean :
+clean:
 	rm -f $(HTML)
 	rm -f $(PDF)
 
 neat:
 	rm *.bak
 
-rebuild : clean all
+rebuild: clean all
 
-dir : 
+dir: 
 	mkdir -p $(OUT)

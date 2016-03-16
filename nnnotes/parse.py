@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# parses the information containned in a formatted md file
+# and constructs a json formatted index
+
 from statemachine import StateMachine
 import sys, string, re, json
 
@@ -17,14 +20,14 @@ def is_tag_identifier(line):
 
 markups = {'QUOTES' : (is_quote_identifier, 'pp', 'tags', 'quote', 'fpc'), 'NOTES' : (is_note_identifier, '#', 'tags', 'note', 'fpc')}
 output = {'QUOTES' : [], 'NOTES' : []}
+fpindex = None
 
 def error(c):
 	fp, l = c
 	sys.stderr.write('Unidentifiable line:\n'+ l)
 
 def eof(c):
-	fpindx = open('.indx','wb')
-	json.dump(output, fpindx)
+	json.dump(output, fpindex)
 
 def parse(c):
 	fp, l = c
@@ -123,12 +126,16 @@ def escape_quote(line):
 	if(not line.strip().startswith('>')):
 		return line
 	l = re.sub('\"*\"', '', line.strip()[1:])
-	return re.sub('pp.[0-9]+', '', l)
+	return re.sub('p.[0-9]+', '', l)
 
 def escape_note(line):
 	return re.sub('^[0-9]+.', '', line).strip()
 
-if __name__ == '__main__':
+def run(fpin, fpout):
+
+	global fpindex
+
+	fpindex = fpout
 	m = StateMachine();
 	m.add_state(parse)
 	m.add_state(NOTES)
@@ -137,4 +144,9 @@ if __name__ == '__main__':
 	m.add_state(error, end_state=1)
 	m.add_state(eof, end_state=1)
 	m.set_start(parse)
-	m.run((sys.stdin, ''))
+	m.run((fpin, ''))	
+
+#main allows unix piping
+if __name__ == '__main__':
+	fpindx = open('.indx','wb')
+	run(sys.stdin, fpindx)

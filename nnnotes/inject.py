@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+
+# reads (1) a formatted md file, (2) json formatted index
+# and injects (sorts and appends) in the md file the information 
+# contained in the index
+
 from statemachine import StateMachine
 import sys, os, string, json, shutil, codecs, traceback
 
@@ -14,7 +19,6 @@ def error(c):
 	sys.stderr.write('Unidentifiable line:\n'+ l)
 
 def eof(c):
-	print "eof"
 	return
 
 def parse(c):
@@ -120,10 +124,13 @@ def emit_quotes(list):
 
 def emit_quote(data):
 	emit_line("<!--page " + data['pp'] + "-->\n\n")
-	emit_line(">\"" + data['quote'] + "\" pp." + data['pp'] + "\n")
+	emit_line(">\"" + data['quote'] + "\" p." + data['pp'] + "\n")
 	emit_line('\n')
 
 def emit_remaining_notes():
+
+	print "emit_remaining_notes"
+
 	rest = []
 	for i in notes:
 		rest.extend(notes[i])	
@@ -168,25 +175,27 @@ def backupfile(p):
 	shutil.copy2(p, bak)
 	return codecs.open(bak, 'r', 'utf-8')
 
+def run(filename1, filename2):
 
-if __name__ == '__main__':
-	if len(sys.argv) < 2:
-		sys.exit('No input file... Aborting.')
+	global fileout, fileref, notes, quotes, notes_cnt
+
 	# fp1 should be the incoming .mmd file
-	try:
-		fileref = backupfile(sys.argv[1])
-		fileout = open_fileoutput(sys.argv[1])
+	try:		
+		fileref = backupfile(filename1)
+		fileout = open_fileoutput(filename1)
 		fileout.seek(0)
 	except:
-		sys.exit("Can't open file " + sys.argv[1] + ". Aborting.")
+		sys.exit("Can't open file " + filename1 + ". Aborting.")
 
-	if len(sys.argv) < 3:
-		fp2 = sys.stdin
-	else:
+	try:
+		fp2 = open_file(filename2)
+	except:
+		# it may be stdin
 		try:
-			fp2 = open_file(sys.argv[2])
+			fp2 = filename2
+			fp2.tell()
 		except:
-			sys.exit("Can't open file " + sys.argv[2] + ". Aborting.")
+			sys.exit("Can't open file " + filename2 + ". Aborting.")
 
 	# fp2 should be the incoming (json) data to inject in fp1
 
@@ -211,8 +220,6 @@ if __name__ == '__main__':
 	quotes = reoder(data['QUOTES'])
 	notes = reoder(data['NOTES'])
 
-	print quotes
-
 	notes_cnt = 0
 
 	try:
@@ -234,7 +241,22 @@ if __name__ == '__main__':
 	finally:
 		fileout.close()
 		fileref.close()
-		sys.exit(trace)
+		return trace
+			
+#main allows unix piping
+if __name__ == '__main__':
+	if len(sys.argv) < 2:
+		sys.exit('No input file... Aborting.')
+
+	if len(sys.argv) < 3:
+		fp2 = sys.stdin
+	else:
+		fp2 = sys.argv[2]
+
+	trace = run(sys.argv[1], fp2)
+	sys.exit(trace)
+
+
 
 
 

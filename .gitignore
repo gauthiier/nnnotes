@@ -1,2 +1,5 @@
 CONFIG
 *.pyc
+build
+dist
+*.egg-info

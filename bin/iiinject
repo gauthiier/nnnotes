@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import os, sys, glob, json
+
+from nnnotes import compare, inject
+
+if __name__ == '__main__':
+
+	indexfile = '.indx'
+
+	pdfs = glob.glob('*.pdf')
+	if len(pdfs) > 1:
+		sys.exit('More than one pdf in current directory. No obvious choice. Aborting.')
+
+	if len(pdfs) == 1:
+		pdf = pdfs[0]
+		if os.path.isfile(indexfile):
+			tmp = '.tmp'
+			os.system('plfr -json ' + pdf + ' > ' + tmp)     	### relying on plfr
+			diff = compare.run(indexfile, tmp)				### new highlights in pdf?
+			
+			with open(tmp, 'w') as fptmp:
+				json.dump(diff, fptmp)
+			indexfile = tmp
+
+		else:
+			os.system('plfr -json ' + pdf + ' > ' + indexfile)
+
+
+	notes = glob.glob('*.mmd')
+	if len(notes) > 1:
+		sys.exit('More or less *.mmd files than expected.')
+	elif len(notes) < 1:
+		sys.exit('No *.mmd in current directory.')
+
+	note = notes[0]
+	inject.run(note, indexfile)
+
+	if os.path.isfile('.tmp'):
+		os.remove('.tmp')

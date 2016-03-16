@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+# compares two json formatted indexes
+# and return the difference 
+
 import sys, os, string, json
 from operator import attrgetter
 
@@ -8,8 +12,8 @@ fp2 = ''
 def difference(data1, data2):
 	output = {'QUOTES' : [], 'NOTES' : []}
 
-	d1 = {i['quote']: i for i in data1['QUOTES']}
-	d2 = {i['quote']: i for i in data2['QUOTES']}
+	d1 = {i['quote'].rstrip(): i for i in data1['QUOTES']}
+	d2 = {i['quote'].rstrip(): i for i in data2['QUOTES']}
 
 	#create sets
 	s1 = set(d1.keys())
@@ -47,28 +51,32 @@ def open_file(p):
 		sys.exit('File %s does not exists... Aborting.' % p)
 	return open(p, 'rb')
 
-if __name__ == '__main__':
-	if len(sys.argv) < 2:
-		sys.exit('No input file... Aborting.')
-	try:
-		fp1 = open_file(sys.argv[1])
-	except:
-		sys.exit("Can't open file " + sys.argv[1] + ". Aborting.")
-	if len(sys.argv) < 3:
-		fp2 = sys.stdin
-	else:
-		try:
-			fp2 = open_file(sys.argv[2])
-		except:
-			sys.exit("Can't open file " + sys.argv[2] + ". Aborting.")
+def run(filename1, filename2):
 
+	#open files
+	try:
+		fp1 = open_file(filename1)
+	except:
+		sys.exit("Can't open file " + filename1 + ". Aborting.")
+
+	try:
+		fp2 = open_file(filename2)
+	except:
+		# it may be std.in
+		try:
+			fp2 = filename2
+			fp2.tell()
+		except:
+			sys.exit("Can't open file " + filename2 + ". Aborting.")
+
+	#read data
 	try:
 		sdata = fp1.read()
 		data1 = json.loads(sdata)
 	except:
-		e = "<compare> Error loading data from" + sys.argv[1] + ". Aborting.\n"
+		e = "<compare> Error loading data from" + filename1 + ". Aborting.\n"
 		if sdata:
-			e += "Traceback: " + sdata1
+			e += "Traceback: " + sdata
 		fp2.close()
 		sys.exit(e)		
 	finally:
@@ -86,11 +94,21 @@ if __name__ == '__main__':
 	finally:
 		fp2.close()
 
+	#process
 	data = difference(data1, data2)
 
 	data['QUOTES'] = sorted(data['QUOTES'], key=lambda entry: int(entry['pp']))
 	data['NOTES'] = sorted(data['NOTES'], key=lambda entry: int(entry['pp']))
 
-	json.dump(data, sys.stdout)
+	#dump
+	return data
+
+#main allows unix piping
+if __name__ == '__main__':
+	if len(sys.argv) < 2:
+		sys.exit('No input file... Aborting.')
+
+	json.dump(run(sys.argv[1], sys.stdin), sys.stdout)
+
 
 

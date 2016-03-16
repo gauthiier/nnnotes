@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+import os, sys, glob
+
+from nnnotes import parse
+
+if __name__ == '__main__':
+
+	indexfile = '.indx'
+
+	notes = glob.glob('*.mmd')
+	if len(notes) > 1:
+		sys.exit('More or less *.mmd files than expected.')
+	elif len(notes) < 1:
+		sys.exit('No *.mmd in current directory.')
+
+	try:
+		note = open(notes[0], 'r+')
+	except:
+		sys.exit('Cannot open ' + notes[0])
+
+	with open(indexfile, 'w') as indx:
+		parse.run(note, indx)
+
+
+
+
